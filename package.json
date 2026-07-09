@@ -1,0 +1,13 @@
+{
+  "name": "coupang-partners-search",
+  "version": "1.0.0",
+  "description": "쿠팡 파트너스 상품검색 로컬 서버 (검색어 → 상품 3개 + 파트너스 링크)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.22.2",
+    "puppeteer": "^25.3.0"
+  }
+}

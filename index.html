@@ -1,0 +1,3205 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>쇼핑쇼츠 소스 런처</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #121217;
+      --panel: #1d1d24;
+      --panel-2: #252630;
+      --line: #363746;
+      --text: #f4f4f6;
+      --muted: #a8a9b8;
+      --soft: #777a8d;
+      --cyan: #31d8ff;
+      --pink: #ff3c9d;
+      --green: #28d87a;
+      --amber: #ffb641;
+      --danger: #ff6060;
+      --glow-pink: rgba(255, 60, 157, .18);
+      --glow-cyan: rgba(49, 216, 255, .12);
+      --shadow: 0 24px 80px rgba(0, 0, 0, .36);
+      font-family: "Pretendard", "Noto Sans KR", "Segoe UI", Arial, sans-serif;
+    }
+
+    body[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --panel-2: #eef2f8;
+      --line: #d5dbea;
+      --text: #171923;
+      --muted: #626b7f;
+      --soft: #7d8494;
+      --cyan: #0877c9;
+      --pink: #e63386;
+      --green: #0b9b55;
+      --amber: #b86e00;
+      --danger: #c94752;
+      --glow-pink: rgba(230, 51, 134, .12);
+      --glow-cyan: rgba(8, 119, 201, .13);
+      --shadow: 0 18px 54px rgba(24, 35, 62, .13);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 18% 8%, var(--glow-pink), transparent 34rem),
+        radial-gradient(circle at 86% 20%, var(--glow-cyan), transparent 28rem),
+        var(--bg);
+      color: var(--text);
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 0 28px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border: 1px solid rgba(49, 216, 255, .36);
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(49, 216, 255, .18), rgba(255, 60, 157, .14));
+      box-shadow: 0 0 0 5px rgba(49, 216, 255, .04);
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 34px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .brand p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .theme-switch {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .055);
+    }
+
+    .theme-option {
+      min-height: 34px;
+      padding: 0 12px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .theme-option.active {
+      background: rgba(255, 255, 255, .14);
+      color: var(--text);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08);
+    }
+
+    .theme-option:focus-visible {
+      outline: 3px solid rgba(49, 216, 255, .36);
+      outline-offset: 2px;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border: 1px solid rgba(40, 216, 122, .28);
+      border-radius: 999px;
+      background: rgba(40, 216, 122, .08);
+      color: #bff6d8;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--green);
+      box-shadow: 0 0 18px rgba(40, 216, 122, .7);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, .9fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .panel {
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .045), rgba(255, 255, 255, .018));
+      box-shadow: var(--shadow);
+    }
+
+    .search-panel {
+      padding: 24px;
+    }
+
+    .label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .input,
+    .textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      outline: none;
+      background: rgba(255, 255, 255, .055);
+      color: var(--text);
+      transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
+    }
+
+    .input {
+      min-height: 52px;
+      padding: 0 14px;
+    }
+
+    .textarea {
+      min-height: 92px;
+      resize: vertical;
+      padding: 13px 14px;
+      line-height: 1.55;
+    }
+
+    .input:focus,
+    .textarea:focus {
+      border-color: rgba(49, 216, 255, .66);
+      background: rgba(255, 255, 255, .075);
+      box-shadow: 0 0 0 4px rgba(49, 216, 255, .1);
+    }
+
+    .hint {
+      margin: 9px 0 0;
+      color: var(--soft);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .keyword-assist {
+      margin-top: 14px;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 14px;
+      background: rgba(0, 0, 0, .16);
+    }
+
+    .assist-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .assist-head strong {
+      font-size: 14px;
+    }
+
+    .assist-head span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .assist-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .assist-output {
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .045);
+      min-width: 0;
+    }
+
+    .assist-output span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .assist-output code {
+      display: block;
+      margin-top: 6px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 900;
+      overflow-wrap: anywhere;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .link-tray {
+      display: none;
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 12px;
+      background: rgba(0, 0, 0, .14);
+    }
+
+    .link-tray.show {
+      display: block;
+    }
+
+    .link-tray strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .link-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .quick-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
+      padding: 0 10px;
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .06);
+      color: var(--text);
+      font-size: 13px;
+      text-decoration: none;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 0 14px;
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 10px;
+      color: var(--text);
+      background: rgba(255, 255, 255, .075);
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform .15s ease, border-color .15s ease, background .15s ease;
+      user-select: none;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255, 255, 255, .28);
+      background: rgba(255, 255, 255, .12);
+    }
+
+    .btn:focus-visible {
+      outline: 3px solid rgba(49, 216, 255, .36);
+      outline-offset: 2px;
+    }
+
+    .btn.primary {
+      border: none;
+      background: linear-gradient(135deg, var(--pink), #884cff 52%, var(--cyan));
+      font-weight: 900;
+    }
+
+    .btn.green {
+      border-color: rgba(40, 216, 122, .3);
+      background: rgba(40, 216, 122, .13);
+      color: #cbffe3;
+    }
+
+    .btn.small {
+      min-height: 34px;
+      padding: 0 10px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    .platforms {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .platform {
+      display: grid;
+      grid-template-columns: 42px 1fr auto;
+      align-items: center;
+      gap: 12px;
+      min-height: 82px;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .045);
+    }
+
+    .platform-icon {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .douyin { background: linear-gradient(135deg, #111, #ff2f75 52%, #00f5ff); }
+    .xhs { background: #f03a3a; }
+    .bili { background: #28a9e8; }
+    .tiktok { background: linear-gradient(135deg, #111, #25f4ee 48%, #fe2c55); }
+    .youtube { background: #ff0033; }
+    .coupang { background: #3478f6; }
+    .coupangPartners { background: linear-gradient(135deg, #4f46e5, #16a34a); }
+    .naverBrandConnect { background: linear-gradient(135deg, #03c75a, #111827); }
+    .naver { background: #03c75a; }
+    .taobao { background: #ff6a00; }
+    .ali1688 { background: linear-gradient(135deg, #ff8a00, #f04438); }
+    .platform-icon.ali1688 { font-size: 13px; }
+
+    .platform strong {
+      display: block;
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    .platform span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      padding: 24px;
+    }
+
+    .workflow-title {
+      margin: 0 0 12px;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    .steps {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .steps li {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, .07);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .04);
+    }
+
+    .step-num {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 9px;
+      background: rgba(49, 216, 255, .13);
+      color: #c8f7ff;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .steps strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .steps p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .memo-box {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, .08);
+    }
+
+    .memo-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .recent {
+      margin-top: 18px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 14px;
+      background: rgba(0, 0, 0, .18);
+    }
+
+    .recent-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .recent-head strong {
+      font-size: 14px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 34px;
+    }
+
+    .publish-panel {
+      margin-top: 18px;
+      padding: 24px;
+    }
+
+    .trend-panel {
+      margin-top: 18px;
+      padding: 24px;
+    }
+
+    .tool-panel {
+      margin-top: 18px;
+      padding: 24px;
+    }
+
+    .download-panel {
+      margin-top: 18px;
+      padding: 24px;
+    }
+
+    .subtitle-panel {
+      margin-top: 18px;
+      padding: 24px;
+    }
+
+    .coupang-api-panel {
+      margin-top: 18px;
+      padding: 24px;
+    }
+
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .download-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-top: 14px;
+    }
+
+    .tool-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 138px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .045);
+      text-decoration: none;
+      transition: transform .15s ease, border-color .15s ease, background .15s ease;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255, 255, 255, .22);
+      background: rgba(255, 255, 255, .075);
+    }
+
+    .tool-card:focus-visible {
+      outline: 3px solid rgba(49, 216, 255, .36);
+      outline-offset: 2px;
+    }
+
+    .tool-card strong {
+      display: block;
+      font-size: 16px;
+    }
+
+    .tool-card span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .download-card {
+      min-height: 120px;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .subtitle-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 150px 150px auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .select {
+      min-height: 52px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      outline: none;
+      background: rgba(255, 255, 255, .055);
+      color: var(--text);
+    }
+
+    .subtitle-result {
+      margin-top: 14px;
+    }
+
+    .subtitle-output {
+      min-height: 220px;
+      font-family: "Consolas", "Segoe UI", monospace;
+      font-size: 13px;
+    }
+
+    .subtitle-status {
+      min-height: 22px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .api-status-text {
+      min-height: 22px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .api-grid {
+      display: grid;
+      grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+      gap: 14px;
+    }
+
+    .api-card {
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .045);
+    }
+
+    .deeplink-card {
+      margin-top: 14px;
+    }
+
+    .api-form {
+      display: grid;
+      gap: 10px;
+    }
+
+    .api-form.two {
+      grid-template-columns: minmax(0, 1fr) 120px auto;
+      align-items: end;
+    }
+
+    .product-results {
+      display: grid;
+      gap: 10px;
+      max-height: 520px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .product-card {
+      display: grid;
+      grid-template-columns: 76px minmax(0, 1fr);
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 12px;
+      background: rgba(0, 0, 0, .16);
+    }
+
+    .product-card img {
+      width: 76px;
+      height: 76px;
+      border-radius: 10px;
+      object-fit: cover;
+      background: rgba(255, 255, 255, .08);
+    }
+
+    .product-card strong {
+      display: block;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .product-card p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .deeplink-output {
+      min-height: 94px;
+      font-size: 13px;
+    }
+
+    .tool-link {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .manage-form {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) auto;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .manage-form .textarea {
+      grid-column: 1 / -1;
+      min-height: 64px;
+    }
+
+    .manage-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .item-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 14px;
+    }
+
+    .item-actions .btn {
+      min-height: 30px;
+      padding: 0 9px;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+
+    .tool-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      margin-bottom: 14px;
+      border-radius: 10px;
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .metaTool { background: linear-gradient(135deg, #1769ff, #9d5cff); }
+    .geminiTool { background: linear-gradient(135deg, #14b8a6, #6366f1); }
+    .qwenTool { background: linear-gradient(135deg, #111827, #2563eb); }
+    .flowTool { background: linear-gradient(135deg, #4285f4, #34a853 50%, #fbbc05); }
+    .symphonyTool { background: linear-gradient(135deg, #111, #25f4ee 48%, #fe2c55); }
+    .youtubeTool { background: #ff0033; }
+    .customTool { background: linear-gradient(135deg, #64748b, #0f172a); }
+
+    .trend-grid {
+      display: grid;
+      grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr);
+      gap: 14px;
+    }
+
+    .trend-card {
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .045);
+    }
+
+    .trend-form {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 118px;
+      gap: 10px;
+    }
+
+    .trend-form .textarea {
+      grid-column: 1 / -1;
+      min-height: 72px;
+    }
+
+    .trend-list {
+      display: grid;
+      gap: 10px;
+      min-height: 80px;
+    }
+
+    .trend-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 12px;
+      background: rgba(0, 0, 0, .16);
+    }
+
+    .trend-item strong {
+      display: block;
+      font-size: 15px;
+    }
+
+    .trend-item p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .trend-item .toolbar {
+      justify-content: flex-end;
+      margin-top: 0;
+    }
+
+    .score-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 42px;
+      min-height: 30px;
+      border-radius: 999px;
+      background: rgba(255, 182, 65, .13);
+      color: #ffe2ad;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .publish-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .publish-head h2 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    .publish-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .publish-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(280px, .9fr);
+      gap: 14px;
+    }
+
+    .publish-card {
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .045);
+    }
+
+    .file-input {
+      width: 100%;
+      min-height: 48px;
+      padding: 11px 12px;
+      border: 1px dashed rgba(255, 255, 255, .22);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .055);
+      color: var(--text);
+    }
+
+    .upload-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .upload-buttons .btn {
+      width: 100%;
+    }
+
+    .upload-item {
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .04);
+    }
+
+    .caption-tools {
+      margin-top: 14px;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 14px;
+      background: rgba(0, 0, 0, .16);
+    }
+
+    .caption-tools-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .caption-tools-head strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .caption-tools-head span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .caption-variants {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .caption-card {
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .045);
+    }
+
+    .caption-card strong {
+      display: block;
+      font-size: 13px;
+    }
+
+    .caption-card pre {
+      min-height: 96px;
+      max-height: 170px;
+      margin: 8px 0 0;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: keep-all;
+      overflow-wrap: anywhere;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .caption-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .publish-note {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .file-meta {
+      min-height: 20px;
+    }
+
+    .chip {
+      min-height: 32px;
+      padding: 0 10px;
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .06);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      z-index: 20;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 12px;
+      background: rgba(18, 18, 23, .96);
+      color: var(--text);
+      box-shadow: var(--shadow);
+      transition: opacity .18s ease, transform .18s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    body[data-theme="light"] .mark {
+      border-color: rgba(8, 119, 201, .28);
+      background: linear-gradient(135deg, rgba(8, 119, 201, .12), rgba(230, 51, 134, .1));
+      box-shadow: 0 0 0 5px rgba(8, 119, 201, .05);
+    }
+
+    body[data-theme="light"] .theme-switch {
+      border-color: #d5dbea;
+      background: rgba(255, 255, 255, .72);
+      box-shadow: 0 10px 28px rgba(24, 35, 62, .08);
+    }
+
+    body[data-theme="light"] .theme-option.active {
+      background: #171923;
+      color: #fff;
+      box-shadow: none;
+    }
+
+    body[data-theme="light"] .status {
+      border-color: rgba(11, 155, 85, .22);
+      background: rgba(11, 155, 85, .08);
+      color: #087043;
+    }
+
+    body[data-theme="light"] .panel {
+      border-color: rgba(24, 35, 62, .1);
+      background: linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(246, 249, 253, .94));
+    }
+
+    body[data-theme="light"] .input,
+    body[data-theme="light"] .textarea,
+    body[data-theme="light"] .select {
+      border-color: #cfd7e7;
+      background: #fff;
+      color: var(--text);
+    }
+
+    body[data-theme="light"] .input:focus,
+    body[data-theme="light"] .textarea:focus,
+    body[data-theme="light"] .select:focus {
+      border-color: rgba(8, 119, 201, .62);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(8, 119, 201, .1);
+    }
+
+    body[data-theme="light"] .btn {
+      border-color: #d4dae8;
+      background: #fff;
+      color: var(--text);
+      box-shadow: 0 7px 18px rgba(24, 35, 62, .06);
+    }
+
+    body[data-theme="light"] .btn:hover {
+      border-color: #b9c3d7;
+      background: #f7f9fd;
+    }
+
+    body[data-theme="light"] .btn.primary {
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--pink), #7852ff 52%, var(--cyan));
+      color: #fff;
+      box-shadow: 0 12px 32px rgba(120, 82, 255, .22);
+    }
+
+    body[data-theme="light"] .btn.green {
+      border-color: rgba(11, 155, 85, .22);
+      background: #eafff3;
+      color: #08653b;
+    }
+
+    body[data-theme="light"] .platform,
+    body[data-theme="light"] .steps li,
+    body[data-theme="light"] .publish-card,
+    body[data-theme="light"] .trend-card,
+    body[data-theme="light"] .api-card,
+    body[data-theme="light"] .tool-card {
+      border-color: rgba(24, 35, 62, .09);
+      background: rgba(255, 255, 255, .72);
+    }
+
+    body[data-theme="light"] .tool-card:hover {
+      border-color: #b9c3d7;
+      background: #fff;
+    }
+
+    body[data-theme="light"] .upload-item {
+      border-color: rgba(24, 35, 62, .09);
+      background: #f7f9fd;
+    }
+
+    body[data-theme="light"] .caption-tools {
+      border-color: rgba(24, 35, 62, .09);
+      background: #f0f4fa;
+    }
+
+    body[data-theme="light"] .caption-card {
+      border-color: rgba(24, 35, 62, .09);
+      background: #fff;
+    }
+
+    body[data-theme="light"] .trend-item {
+      border-color: rgba(24, 35, 62, .09);
+      background: #f7f9fd;
+    }
+
+    body[data-theme="light"] .product-card {
+      border-color: rgba(24, 35, 62, .09);
+      background: #f7f9fd;
+    }
+
+    body[data-theme="light"] .score-pill {
+      background: #fff4d8;
+      color: #8a5700;
+    }
+
+    body[data-theme="light"] .file-input {
+      border-color: #b9c3d7;
+      background: #fff;
+      color: var(--text);
+    }
+
+    body[data-theme="light"] .recent {
+      border-color: rgba(24, 35, 62, .09);
+      background: #f0f4fa;
+    }
+
+    body[data-theme="light"] .keyword-assist {
+      border-color: rgba(24, 35, 62, .09);
+      background: #f0f4fa;
+    }
+
+    body[data-theme="light"] .assist-output {
+      border-color: rgba(24, 35, 62, .09);
+      background: #fff;
+    }
+
+    body[data-theme="light"] .link-tray {
+      border-color: rgba(24, 35, 62, .09);
+      background: #f0f4fa;
+    }
+
+    body[data-theme="light"] .chip {
+      border-color: #d4dae8;
+      background: #fff;
+      color: var(--text);
+    }
+
+    body[data-theme="light"] .quick-link {
+      border-color: #d4dae8;
+      background: #fff;
+      color: var(--text);
+    }
+
+    body[data-theme="light"] .step-num {
+      background: rgba(8, 119, 201, .1);
+      color: #075f9f;
+    }
+
+    body[data-theme="light"] .memo-box {
+      border-top-color: rgba(24, 35, 62, .1);
+    }
+
+    body[data-theme="light"] .toast {
+      border-color: rgba(24, 35, 62, .12);
+      background: rgba(255, 255, 255, .97);
+      color: var(--text);
+    }
+
+    @media (max-width: 920px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .platforms {
+        grid-template-columns: 1fr;
+      }
+
+      .publish-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .trend-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .api-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tool-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .download-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .subtitle-controls {
+        grid-template-columns: 1fr;
+      }
+
+      .api-form.two {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .shell {
+        width: min(100% - 22px, 1180px);
+        padding-top: 16px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .top-actions {
+        justify-content: flex-start;
+      }
+
+      .search-panel,
+      .right-panel {
+        padding: 16px;
+      }
+
+      .input-row {
+        grid-template-columns: 1fr;
+      }
+
+      .assist-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .platform {
+        grid-template-columns: 38px 1fr;
+      }
+
+      .platform .btn {
+        grid-column: 1 / -1;
+        width: 100%;
+      }
+
+      .publish-panel {
+        padding: 16px;
+      }
+
+      .trend-panel {
+        padding: 16px;
+      }
+
+      .tool-panel {
+        padding: 16px;
+      }
+
+      .publish-head {
+        flex-direction: column;
+      }
+
+      .trend-form {
+        grid-template-columns: 1fr;
+      }
+
+      .manage-form {
+        grid-template-columns: 1fr;
+      }
+
+      .upload-buttons {
+        grid-template-columns: 1fr;
+      }
+
+      .caption-variants {
+        grid-template-columns: 1fr;
+      }
+
+      .tool-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .001ms !important;
+        animation-duration: .001ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark">S</div>
+        <div>
+          <h1>쇼핑쇼츠 소스 런처</h1>
+          <p>상품 키워드를 한 번 넣고, 각 영상 플랫폼 검색으로 바로 이동합니다.</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <div class="theme-switch" role="group" aria-label="테마 선택">
+          <button class="theme-option active" id="darkTheme" type="button" aria-pressed="true">다크</button>
+          <button class="theme-option" id="lightTheme" type="button" aria-pressed="false">라이트</button>
+        </div>
+        <div class="status"><span class="status-dot"></span> 자동 수집 없음, 직접 확인용</div>
+      </div>
+    </header>
+
+    <section class="hero">
+      <section class="panel search-panel" aria-label="검색 입력">
+        <div class="input-row">
+          <div>
+            <label class="label" for="krKeyword">한국어 상품 키워드</label>
+            <input class="input" id="krKeyword" autocomplete="off" placeholder="예: 휴대용 선풍기">
+          </div>
+          <div>
+            <label class="label" for="cnKeyword">중국어/영문 키워드</label>
+            <input class="input" id="cnKeyword" autocomplete="off" placeholder="예: 便携风扇 portable fan">
+          </div>
+        </div>
+
+        <div class="keyword-assist" id="keywordAssist" aria-live="polite">
+          <div class="assist-head">
+            <strong>검색 키워드 추천</strong>
+            <span id="assistStatus">한국어를 입력하면 바로 추천합니다.</span>
+          </div>
+          <div class="assist-grid">
+            <div class="assist-output">
+              <span>중국어</span>
+              <code id="suggestCn">-</code>
+            </div>
+            <div class="assist-output">
+              <span>영문</span>
+              <code id="suggestEn">-</code>
+            </div>
+          </div>
+          <div class="toolbar">
+            <button class="btn green small" id="applySuggestedKeywords" type="button">추천 적용</button>
+            <button class="btn small" id="copySuggestedKeywords" type="button">추천 복사</button>
+          </div>
+        </div>
+
+        <p class="hint">도우인, 샤오홍슈, 빌리빌리, 타오바오, 1688은 중국어 키워드가 더 잘 잡힙니다. 추천값은 쇼핑 키워드용 사전 기반이라 중요한 상품은 한 번 더 확인하세요.</p>
+
+        <div class="toolbar">
+          <button class="btn primary" id="openChina">중국 플랫폼 열기</button>
+          <button class="btn green" id="openGlobal">글로벌/국내 열기</button>
+          <button class="btn" id="openTranslate">키워드 변환</button>
+          <button class="btn" id="saveKeyword">키워드 저장</button>
+        </div>
+        <div class="link-tray" id="linkTray" aria-live="polite"></div>
+
+        <div class="platforms" id="platforms"></div>
+
+        <div class="recent">
+          <div class="recent-head">
+            <strong>최근 키워드</strong>
+            <button class="btn small" id="clearRecent">비우기</button>
+          </div>
+          <div class="chips" id="recentChips"></div>
+        </div>
+      </section>
+
+      <aside class="panel right-panel" aria-label="작업 메모">
+        <h2 class="workflow-title">직접 찾는 흐름</h2>
+        <ol class="steps">
+          <li>
+            <span class="step-num">1</span>
+            <div>
+              <strong>상품 키워드 입력</strong>
+              <p>한국어와 중국어 키워드를 함께 넣어두면 플랫폼별 검색이 빨라집니다.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-num">2</span>
+            <div>
+              <strong>각 사이트에서 직접 확인</strong>
+              <p>실사용 장면, 손에 든 컷, 비교 컷, 문제 해결 컷을 우선으로 봅니다.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-num">3</span>
+            <div>
+              <strong>후보 링크 메모</strong>
+              <p>사용 가능한 소스만 메모하고, 저작권이 불확실한 영상은 그대로 재업로드하지 않습니다.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-num">4</span>
+            <div>
+              <strong>내 쇼츠 제작</strong>
+              <p>직접 촬영, 허가된 이미지, 상품 상세 이미지 중심으로 대본과 자막을 만듭니다.</p>
+            </div>
+          </li>
+        </ol>
+
+        <div class="memo-box">
+          <label class="label" for="memo">후보 링크/아이디어 메모</label>
+          <textarea class="textarea" id="memo" placeholder="예: 도우인 후보 1 - 손에 들고 사용하는 장면&#10;예: 샤오홍슈 후보 2 - before/after 구도"></textarea>
+          <div class="memo-actions">
+            <button class="btn green" id="copyMemo">메모 복사</button>
+            <button class="btn" id="downloadMemo">메모 저장</button>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="panel trend-panel" aria-label="데일리 틱톡 상품 레이더">
+      <div class="publish-head">
+        <div>
+          <h2>데일리 틱톡 상품 레이더</h2>
+          <p>틱톡 트렌드 소스를 확인하고, 오늘 팔아볼 상품 후보를 점수순으로 저장합니다.</p>
+        </div>
+        <div class="status"><span class="status-dot"></span> 오늘 기준 <span id="trendDate">-</span></div>
+      </div>
+
+      <div class="trend-grid">
+        <div class="trend-card">
+          <span class="label">트렌드 소스 열기</span>
+          <div class="upload-buttons">
+            <a class="btn primary" href="https://ads.tiktok.com/business/creativecenter/top-products/mobile/en" target="_blank" rel="noopener noreferrer">Top Products</a>
+            <a class="btn" href="https://ads.tiktok.com/business/creativecenter/" target="_blank" rel="noopener noreferrer">Creative Center</a>
+            <button class="btn green" id="tiktokSearchBtn" type="button">틱톡 검색</button>
+          </div>
+          <div id="tiktokResult" style="margin-top: 15px; width: 100%; font-size: 14px; overflow-x: auto; background: var(--panel-2); padding: 10px; border-radius: 8px;"></div>
+          <p class="publish-note" style="margin-top: 10px;">공식 트렌드 화면에서 상품명, 카테고리, 반복 노출되는 후킹 포인트를 보고 아래 후보에 저장하세요.</p>
+
+          <label class="label" for="trendName">오늘 후보 상품</label>
+          <div class="trend-form">
+            <input class="input" id="trendName" autocomplete="off" placeholder="예: 골프 마스크">
+            <input class="input" id="trendScore" type="number" min="1" max="10" value="7" aria-label="점수">
+            <textarea class="textarea" id="trendReason" placeholder="예: 여름 라운딩, 자외선 차단, 착용 전후 컷 만들기 좋음"></textarea>
+          </div>
+          <div class="toolbar">
+            <button class="btn green" id="addTrendItem" type="button">후보 추가</button>
+            <button class="btn" id="clearTrendItems" type="button">오늘 후보 비우기</button>
+          </div>
+        </div>
+
+        <div class="trend-card">
+          <div class="recent-head">
+            <strong>오늘 추천 후보</strong>
+            <button class="btn small" id="copyTrendItems" type="button">목록 복사</button>
+          </div>
+          <div class="trend-list" id="trendList"></div>
+          <p class="publish-note">`조사 시작`을 누르면 상품명이 검색 키워드로 들어가고, 도우인/샤오홍슈/틱톡/쿠팡 버튼을 바로 사용할 수 있습니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel coupang-api-panel" aria-label="쿠팡 파트너스 API">
+      <div class="publish-head">
+        <div>
+          <h2>쿠팡 파트너스 API</h2>
+          <p>발급받은 키를 로컬 서버에 저장하고, 상품 검색과 파트너스 링크 변환을 바로 실행합니다.</p>
+        </div>
+        <div class="status"><span class="status-dot"></span> 로컬 키 보관</div>
+      </div>
+
+      <div class="api-grid">
+        <div class="api-card">
+          <span class="label">API 키 저장</span>
+          <div class="api-form">
+            <input class="input" id="coupangAccessKey" autocomplete="off" placeholder="Access Key">
+            <input class="input" id="coupangSecretKey" type="password" autocomplete="off" placeholder="Secret Key">
+            <input class="input" id="coupangSubId" autocomplete="off" placeholder="Sub ID 선택 입력">
+            <div class="toolbar">
+              <button class="btn green" id="saveCoupangKeys" type="button">키 저장</button>
+              <button class="btn" id="checkCoupangStatus" type="button">연결 확인</button>
+            </div>
+          </div>
+          <p class="api-status-text" id="coupangStatus">키는 채팅이나 HTML에 저장하지 말고 이 로컬 입력칸에만 넣으세요.</p>
+          <p class="publish-note">저장 위치는 이 프로젝트의 `.env` 파일입니다. Secret Key는 화면에 다시 표시하지 않습니다.</p>
+        </div>
+
+        <div class="api-card">
+          <span class="label">상품 검색</span>
+          <div class="api-form two">
+            <input class="input" id="coupangSearchKeyword" autocomplete="off" placeholder="예: 골프 마스크">
+            <input class="input" id="coupangSearchLimit" type="number" min="1" max="20" value="10" aria-label="검색 개수">
+            <button class="btn primary" id="searchCoupangProducts" type="button">검색</button>
+          </div>
+          <p class="publish-note">검색 결과의 상품 URL은 쿠팡 파트너스 API 응답 기준으로 표시합니다.</p>
+          <div class="product-results" id="coupangProductResults"></div>
+        </div>
+      </div>
+
+      <div class="api-card deeplink-card">
+        <span class="label">쿠팡 URL을 파트너스 링크로 변환</span>
+        <textarea class="textarea" id="coupangDeeplinkUrls" placeholder="쿠팡 상품 URL을 한 줄에 하나씩 붙여넣기"></textarea>
+        <div class="toolbar">
+          <button class="btn green" id="convertCoupangLinks" type="button">파트너스 링크 생성</button>
+          <button class="btn" id="copyCoupangLinks" type="button">결과 복사</button>
+        </div>
+        <textarea class="textarea deeplink-output" id="coupangDeeplinkOutput" placeholder="생성된 파트너스 링크가 여기에 표시됩니다."></textarea>
+      </div>
+    </section>
+
+    <section class="panel tool-panel" aria-label="AI 제작 도구">
+      <div class="publish-head">
+        <div>
+          <h2>AI 제작 도구</h2>
+          <p>상품 이미지, 대본, 장면 아이디어, 세로 영상 제작에 쓸 도구를 바로 엽니다.</p>
+        </div>
+        <div class="status"><span class="status-dot"></span> 제작 도구 모음</div>
+      </div>
+
+      <div class="tool-grid" id="aiToolGrid"></div>
+      <div class="manage-form" aria-label="제작 도구 추가">
+        <input class="input" id="aiToolName" autocomplete="off" placeholder="도구 이름">
+        <input class="input" id="aiToolUrl" autocomplete="off" placeholder="https://...">
+        <button class="btn green" id="addAiTool" type="button">도구 추가</button>
+        <textarea class="textarea" id="aiToolNote" placeholder="용도 메모: 예) 상품 이미지 생성, 대본 보조, 영상 장면 제작"></textarea>
+      </div>
+      <div class="manage-actions">
+        <button class="btn small" id="resetAiTools" type="button">제작 도구 기본값 복원</button>
+      </div>
+    </section>
+
+    <section class="panel download-panel" aria-label="영상 다운로드 도구">
+      <div class="publish-head">
+        <div>
+          <h2>영상 다운로드 도구</h2>
+          <p>참고할 영상 링크를 넣고 다운로드 도구를 엽니다. 본인 영상이나 사용 허가가 있는 자료에만 사용하세요.</p>
+        </div>
+        <div class="status"><span class="status-dot"></span> 링크 복사 후 열기</div>
+      </div>
+
+      <label class="label" for="downloadSourceUrl">영상 링크</label>
+      <input class="input" id="downloadSourceUrl" autocomplete="off" placeholder="틱톡, 유튜브, 인스타 영상 URL 붙여넣기">
+      <div class="tool-grid download-grid" id="downloadToolGrid"></div>
+      <p class="publish-note">다운로드 사이트가 열리면 방금 복사된 링크를 붙여넣으세요. 플랫폼 약관과 저작권은 직접 확인해야 합니다.</p>
+    </section>
+
+    <section class="panel subtitle-panel" aria-label="자막 추출">
+      <div class="publish-head">
+        <div>
+          <h2>자막 추출</h2>
+          <p>다운받은 영상 파일에서 음성을 인식해 TXT, SRT, VTT 자막을 만듭니다.</p>
+        </div>
+        <div class="status"><span class="status-dot"></span> 로컬 Whisper</div>
+      </div>
+
+      <div class="subtitle-controls">
+        <div>
+          <label class="label" for="subtitleVideoFile">영상 파일</label>
+          <input class="file-input" id="subtitleVideoFile" type="file" accept="video/mp4,video/quicktime,video/webm,video/*,audio/*">
+        </div>
+        <div>
+          <label class="label" for="subtitleLanguage">언어</label>
+          <select class="select" id="subtitleLanguage">
+            <option value="auto">자동 감지</option>
+            <option value="ko">한국어</option>
+            <option value="en">영어</option>
+            <option value="zh">중국어</option>
+            <option value="ja">일본어</option>
+          </select>
+        </div>
+        <div>
+          <label class="label" for="subtitleModel">정확도</label>
+          <select class="select" id="subtitleModel">
+            <option value="tiny">빠름</option>
+            <option value="base" selected>기본</option>
+            <option value="small">더 정확</option>
+          </select>
+        </div>
+        <button class="btn primary" id="extractSubtitles" type="button">자막 추출</button>
+<button class="btn" id="convertScript" type="button" style="background: var(--pink); border-color: var(--pink);">대본 변환 (AI)</button>
+      </div>
+      <p class="subtitle-status" id="subtitleStatus">처음 실행할 때는 Whisper 모델을 내려받느라 시간이 걸릴 수 있습니다.</p>
+
+      <div class="subtitle-result">
+        <label class="label" for="subtitleOutput">추출 결과</label>
+        <textarea class="textarea subtitle-output" id="subtitleOutput" placeholder="자막 추출 결과가 여기에 표시됩니다."></textarea>
+        <div class="toolbar">
+          <button class="btn green" id="copySubtitleText" type="button">텍스트 복사</button>
+          <button class="btn" id="downloadSubtitleTxt" type="button">TXT 저장</button>
+          <button class="btn" id="downloadSubtitleSrt" type="button">SRT 저장</button>
+          <button class="btn" id="downloadSubtitleVtt" type="button">VTT 저장</button>
+        </div>
+      </div>
+      <p class="publish-note">영상 원본의 저작권과 플랫폼 약관을 확인한 뒤 사용하세요. 긴 영상은 처리 시간이 길어질 수 있습니다.</p>
+    </section>
+
+    <section class="panel publish-panel" aria-label="게시 업로드 허브">
+      <div class="publish-head">
+        <div>
+          <h2>게시 업로드 허브</h2>
+          <p>완성된 쇼츠 MP4와 캡션을 준비한 뒤, 각 플랫폼 업로드 화면으로 바로 이동합니다.</p>
+        </div>
+        <div class="status"><span class="status-dot"></span> 직접 업로드 모드</div>
+      </div>
+
+      <div class="publish-grid">
+        <div class="publish-card">
+          <label class="label" for="videoFile">완성 영상 파일</label>
+          <input class="file-input" id="videoFile" type="file" accept="video/mp4,video/quicktime,video/webm,video/*">
+          <p class="hint file-meta" id="videoInfo">MP4 파일을 선택하면 공유 지원 여부를 확인합니다.</p>
+
+          <label class="label" for="postCaption">업로드 캡션</label>
+          <textarea class="textarea" id="postCaption" placeholder="예: 여름 라운딩 필수템, 골프 마스크 찾는 분들 보세요.&#10;&#10;#골프마스크 #골프용품 #쇼핑추천 #쿠팡파트너스"></textarea>
+
+          <div class="toolbar">
+            <button class="btn green" id="copyPostCaption" type="button">캡션 복사</button>
+            <button class="btn" id="shareVideo" type="button">영상 공유</button>
+          </div>
+
+          <div class="caption-tools" aria-label="플랫폼별 캡션 자동 작성">
+            <div class="caption-tools-head">
+              <div>
+                <strong>플랫폼별 캡션 초안</strong>
+                <span>영상 파일명과 상품 키워드로 틱톡, 인스타, 쓰레드, 유튜브용 문구를 만듭니다.</span>
+              </div>
+              <button class="btn small" id="generateCaptions" type="button">다시 생성</button>
+            </div>
+            <div class="caption-variants" id="captionVariantGrid"></div>
+          </div>
+        </div>
+
+        <div class="publish-card">
+          <span class="label">업로드 화면 열기</span>
+          <div class="upload-buttons" id="uploadLinkGrid"></div>
+          <div class="manage-form" aria-label="업로드 링크 추가">
+            <input class="input" id="uploadLinkName" autocomplete="off" placeholder="업로드 위치 이름">
+            <input class="input" id="uploadLinkUrl" autocomplete="off" placeholder="https://...">
+            <button class="btn green" id="addUploadLink" type="button">링크 추가</button>
+          </div>
+          <p class="publish-note">틱톡은 일반 업로드, 틱톡 스튜디오는 광고/크리에이티브 제작 도구입니다. 용도가 달라서 둘 다 기본값으로 둡니다.</p>
+          <p class="publish-note">인스타와 유튜브는 업로드 화면에서 파일을 직접 선택해야 합니다. 쓰레드는 캡션을 URL에 실어 작성창을 열 수 있습니다.</p>
+          <p class="publish-note">자동 게시 API는 별도 로그인, 권한 승인, 앱 심사, 비즈니스/크리에이터 계정 조건이 필요합니다.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const platforms = [
+      {
+        id: "douyin",
+        name: "도우인",
+        note: "중국 숏폼 실사용 영상",
+        group: "china",
+        key: "cn",
+        icon: "抖",
+        build: (q) => `https://www.douyin.com/search/${encodeURIComponent(q)}`
+      },
+      {
+        id: "xhs",
+        name: "샤오홍슈",
+        note: "리뷰, 사용 후기, 썸네일 참고",
+        group: "china",
+        key: "cn",
+        icon: "小",
+        build: (q) => `https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(q)}`
+      },
+      {
+        id: "bili",
+        name: "빌리빌리",
+        note: "긴 리뷰, 설명형 콘텐츠 참고",
+        group: "china",
+        key: "cn",
+        icon: "B",
+        build: (q) => `https://search.bilibili.com/all?keyword=${encodeURIComponent(q)}`
+      },
+      {
+        id: "taobao",
+        name: "타오바오",
+        note: "상세 이미지, 판매 문구 참고",
+        group: "china",
+        key: "cn",
+        icon: "淘",
+        build: (q) => `https://s.taobao.com/search?q=${encodeURIComponent(q)}`
+      },
+      {
+        id: "ali1688",
+        name: "1688",
+        note: "도매 상품, 상세 이미지 참고",
+        group: "china",
+        key: "cn",
+        icon: "1688",
+        build: (q) => `https://s.1688.com/selloffer/offer_search.htm?keywords=${encodeURIComponent(q)}`
+      },
+      {
+        id: "tiktok",
+        name: "틱톡",
+        note: "해외 반응, 숏폼 후킹 참고",
+        group: "global",
+        key: "kr",
+        icon: "T",
+        build: (q) => `https://www.tiktok.com/search?q=${encodeURIComponent(q)}`
+      },
+      {
+        id: "youtube",
+        name: "유튜브",
+        note: "쇼츠, 롱폼 리뷰 동시 확인",
+        group: "global",
+        key: "kr",
+        icon: "Y",
+        build: (q) => `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`
+      },
+      {
+        id: "coupang",
+        name: "쿠팡",
+        note: "국내 상품명, 리뷰, 가격 확인",
+        group: "global",
+        key: "kr",
+        icon: "C",
+        build: (q) => `https://www.coupang.com/np/search?q=${encodeURIComponent(q)}`
+      },
+      {
+        id: "coupangPartners",
+        name: "쿠팡파트너스",
+        note: "수익링크 생성 페이지로 이동",
+        group: "partner",
+        needsQuery: false,
+        key: "kr",
+        icon: "P",
+        build: () => "https://partners.coupang.com/"
+      },
+      {
+        id: "naverBrandConnect",
+        name: "네이버 브랜드커넥트",
+        note: "쇼핑 커넥트 상품 찾기",
+        group: "partner",
+        needsQuery: false,
+        key: "kr",
+        icon: "N",
+        build: () => "https://brandconnect.naver.com/958720022084032/affiliate/products"
+      },
+      {
+        id: "naver",
+        name: "네이버쇼핑",
+        note: "국내 키워드와 경쟁 상품 확인",
+        group: "global",
+        key: "kr",
+        icon: "N",
+        build: (q) => `https://search.shopping.naver.com/search/all?query=${encodeURIComponent(q)}`
+      }
+    ];
+
+    const krInput = document.querySelector("#krKeyword");
+    const cnInput = document.querySelector("#cnKeyword");
+    const suggestCn = document.querySelector("#suggestCn");
+    const suggestEn = document.querySelector("#suggestEn");
+    const assistStatus = document.querySelector("#assistStatus");
+    const platformsEl = document.querySelector("#platforms");
+    const linkTray = document.querySelector("#linkTray");
+    const recentChips = document.querySelector("#recentChips");
+    const memo = document.querySelector("#memo");
+    const videoFile = document.querySelector("#videoFile");
+    const videoInfo = document.querySelector("#videoInfo");
+    const postCaption = document.querySelector("#postCaption");
+    const captionVariantGrid = document.querySelector("#captionVariantGrid");
+    const aiToolGrid = document.querySelector("#aiToolGrid");
+    const aiToolName = document.querySelector("#aiToolName");
+    const aiToolUrl = document.querySelector("#aiToolUrl");
+    const aiToolNote = document.querySelector("#aiToolNote");
+    const coupangAccessKey = document.querySelector("#coupangAccessKey");
+    const coupangSecretKey = document.querySelector("#coupangSecretKey");
+    const coupangSubId = document.querySelector("#coupangSubId");
+    const coupangStatus = document.querySelector("#coupangStatus");
+    const coupangSearchKeyword = document.querySelector("#coupangSearchKeyword");
+    const coupangSearchLimit = document.querySelector("#coupangSearchLimit");
+    const coupangProductResults = document.querySelector("#coupangProductResults");
+    const coupangDeeplinkUrls = document.querySelector("#coupangDeeplinkUrls");
+    const coupangDeeplinkOutput = document.querySelector("#coupangDeeplinkOutput");
+    const downloadSourceUrl = document.querySelector("#downloadSourceUrl");
+    const downloadToolGrid = document.querySelector("#downloadToolGrid");
+    const subtitleVideoFile = document.querySelector("#subtitleVideoFile");
+    const subtitleLanguage = document.querySelector("#subtitleLanguage");
+    const subtitleModel = document.querySelector("#subtitleModel");
+    const subtitleStatus = document.querySelector("#subtitleStatus");
+    const subtitleOutput = document.querySelector("#subtitleOutput");
+    const uploadLinkGrid = document.querySelector("#uploadLinkGrid");
+    const uploadLinkName = document.querySelector("#uploadLinkName");
+    const uploadLinkUrl = document.querySelector("#uploadLinkUrl");
+    const trendDate = document.querySelector("#trendDate");
+    const trendName = document.querySelector("#trendName");
+    const trendScore = document.querySelector("#trendScore");
+    const trendReason = document.querySelector("#trendReason");
+    const trendList = document.querySelector("#trendList");
+    const toast = document.querySelector("#toast");
+    const darkTheme = document.querySelector("#darkTheme");
+    const lightTheme = document.querySelector("#lightTheme");
+
+    const RECENT_KEY = "shoppingShortsLauncher.recent";
+    const THEME_KEY = "shoppingShortsLauncher.theme";
+    const TREND_KEY_PREFIX = "shoppingShortsLauncher.trends.";
+    const AI_TOOLS_KEY = "shoppingShortsLauncher.aiTools";
+    const UPLOAD_LINKS_KEY = "shoppingShortsLauncher.uploadLinks";
+    const YOUTUBE_STUDIO_URL = "https://studio.youtube.com/channel/UC-xRTJZbnCw9GehMF5OOf7A";
+    const todayKey = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" });
+    let subtitleResult = null;
+
+    const defaultAiTools = [
+      { name: "Meta AI", url: "https://www.meta.ai/", note: "상품 설명, 후킹 문구, 이미지 아이디어", icon: "M", badgeClass: "metaTool" },
+      { name: "GeminiGen", url: "https://geminigen.ai/", note: "이미지/영상 생성 참고용", icon: "G", badgeClass: "geminiTool" },
+      { name: "Qwen", url: "https://qwen.ai/home", note: "중국어 키워드, 카피, 대본 보조", icon: "Q", badgeClass: "qwenTool" },
+      { name: "Google Flow", url: "https://labs.google/fx/tools/flow", note: "AI 영상 장면 제작", icon: "F", badgeClass: "flowTool" },
+      { name: "TikTok Studio", url: "https://ads.tiktok.com/creative/creativestudio/create", note: "틱톡용 크리에이티브 제작", icon: "T", badgeClass: "symphonyTool" }
+    ];
+
+    const downloadTools = [
+      { name: "SnapTik", url: "https://snaptik.app/ko2", note: "틱톡 영상 다운로드", icon: "T", badgeClass: "symphonyTool" },
+      { name: "유튜브 다운로드", url: "https://ko.savefrom.net/229au/", note: "SaveFrom에서 유튜브 링크 처리", icon: "Y", badgeClass: "qwenTool" },
+      { name: "YouTube Studio", url: YOUTUBE_STUDIO_URL, note: "내 쇼츠 채널 업로드/관리", icon: "Y", badgeClass: "youtubeTool" }
+    ];
+
+    const defaultUploadLinks = [
+      { name: "틱톡", url: "https://www.tiktok.com/upload", variant: "primary" },
+      { name: "틱톡 스튜디오", url: "https://ads.tiktok.com/creative/creativestudio/create", variant: "" },
+      { name: "인스타", url: "https://www.instagram.com/", variant: "green" },
+      { name: "쓰레드", url: "https://www.threads.com/intent/post", variant: "", kind: "threads" },
+      { name: "유튜브", url: YOUTUBE_STUDIO_URL, variant: "primary" }
+    ];
+
+    const phraseKeywordMap = [
+      { ko: "골프마스크", cn: "高尔夫防晒面罩", en: "golf sun protection mask" },
+      { ko: "휴대용선풍기", cn: "便携式风扇", en: "portable fan" },
+      { ko: "무선미니청소기", cn: "无线迷你吸尘器", en: "wireless mini vacuum" },
+      { ko: "보조배터리", cn: "充电宝", en: "power bank" },
+      { ko: "차량용청소기", cn: "车载吸尘器", en: "car vacuum cleaner" },
+      { ko: "차량용거치대", cn: "车载手机支架", en: "car phone holder" },
+      { ko: "쿨링타월", cn: "冰感毛巾", en: "cooling towel" },
+      { ko: "쿨링마스크", cn: "冰丝防晒面罩", en: "cooling sun mask" },
+      { ko: "자외선차단마스크", cn: "防晒面罩", en: "uv protection mask" },
+      { ko: "휴대용가습기", cn: "便携式加湿器", en: "portable humidifier" },
+      { ko: "미니가습기", cn: "迷你加湿器", en: "mini humidifier" },
+      { ko: "넥선풍기", cn: "挂脖风扇", en: "neck fan" },
+      { ko: "목걸이선풍기", cn: "挂脖风扇", en: "neck fan" },
+      { ko: "마사지건", cn: "筋膜枪", en: "massage gun" },
+      { ko: "폼롤러", cn: "泡沫轴", en: "foam roller" },
+      { ko: "텀블러", cn: "保温杯", en: "tumbler" },
+      { ko: "물병", cn: "水杯", en: "water bottle" },
+      { ko: "골프장갑", cn: "高尔夫手套", en: "golf gloves" },
+      { ko: "골프티", cn: "高尔夫球钉", en: "golf tees" },
+      { ko: "골프공", cn: "高尔夫球", en: "golf balls" }
+    ];
+
+    const wordKeywordMap = [
+      { ko: "골프", cn: "高尔夫", en: "golf" },
+      { ko: "마스크", cn: "面罩", en: "mask" },
+      { ko: "방수", cn: "防水", en: "waterproof" },
+      { ko: "방풍", cn: "防风", en: "windproof" },
+      { ko: "방한", cn: "保暖", en: "warm" },
+      { ko: "자외선", cn: "防晒", en: "uv protection" },
+      { ko: "차단", cn: "防护", en: "protection" },
+      { ko: "쿨링", cn: "冰感", en: "cooling" },
+      { ko: "여름", cn: "夏季", en: "summer" },
+      { ko: "휴대용", cn: "便携式", en: "portable" },
+      { ko: "미니", cn: "迷你", en: "mini" },
+      { ko: "무선", cn: "无线", en: "wireless" },
+      { ko: "전동", cn: "电动", en: "electric" },
+      { ko: "충전식", cn: "充电式", en: "rechargeable" },
+      { ko: "선풍기", cn: "风扇", en: "fan" },
+      { ko: "청소기", cn: "吸尘器", en: "vacuum cleaner" },
+      { ko: "가습기", cn: "加湿器", en: "humidifier" },
+      { ko: "제습기", cn: "除湿机", en: "dehumidifier" },
+      { ko: "공기청정기", cn: "空气净化器", en: "air purifier" },
+      { ko: "마사지", cn: "按摩", en: "massage" },
+      { ko: "거치대", cn: "支架", en: "holder" },
+      { ko: "스탠드", cn: "支架", en: "stand" },
+      { ko: "차량용", cn: "车载", en: "car" },
+      { ko: "주방", cn: "厨房", en: "kitchen" },
+      { ko: "욕실", cn: "浴室", en: "bathroom" },
+      { ko: "캠핑", cn: "露营", en: "camping" },
+      { ko: "등산", cn: "登山", en: "hiking" },
+      { ko: "운동", cn: "运动", en: "sports" },
+      { ko: "필라테스", cn: "普拉提", en: "pilates" },
+      { ko: "요가", cn: "瑜伽", en: "yoga" },
+      { ko: "가방", cn: "包", en: "bag" },
+      { ko: "파우치", cn: "收纳包", en: "pouch" },
+      { ko: "정리함", cn: "收纳盒", en: "storage box" },
+      { ko: "수납", cn: "收纳", en: "storage" },
+      { ko: "물병", cn: "水杯", en: "water bottle" },
+      { ko: "텀블러", cn: "保温杯", en: "tumbler" },
+      { ko: "장갑", cn: "手套", en: "gloves" },
+      { ko: "모자", cn: "帽子", en: "hat" },
+      { ko: "양산", cn: "遮阳伞", en: "sun umbrella" },
+      { ko: "우산", cn: "雨伞", en: "umbrella" },
+      { ko: "LED", cn: "LED", en: "led" },
+      { ko: "스마트", cn: "智能", en: "smart" }
+    ];
+
+    function applyTheme(theme) {
+      const nextTheme = theme === "light" ? "light" : "dark";
+      document.body.dataset.theme = nextTheme;
+      localStorage.setItem(THEME_KEY, nextTheme);
+      darkTheme.classList.toggle("active", nextTheme === "dark");
+      lightTheme.classList.toggle("active", nextTheme === "light");
+      darkTheme.setAttribute("aria-pressed", String(nextTheme === "dark"));
+      lightTheme.setAttribute("aria-pressed", String(nextTheme === "light"));
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 2100);
+    }
+
+    function normalizeKoreanKeyword(value) {
+      return value.replace(/[(){}\[\],.·/|+_-]/g, " ").replace(/\s+/g, " ").trim();
+    }
+
+    function dedupeParts(parts) {
+      return [...new Set(parts.filter(Boolean).map((part) => String(part).trim()).filter(Boolean))];
+    }
+
+    function buildKeywordSuggestion(value) {
+      const keyword = normalizeKoreanKeyword(value);
+      const compact = keyword.replace(/\s/g, "");
+      if (!compact) {
+        return { cn: "", en: "", matched: 0, status: "한국어를 입력하면 바로 추천합니다." };
+      }
+
+      const phrase = phraseKeywordMap
+        .slice()
+        .sort((a, b) => b.ko.length - a.ko.length)
+        .find((item) => compact.includes(item.ko));
+
+      if (phrase) {
+        return {
+          cn: phrase.cn,
+          en: phrase.en,
+          matched: 1,
+          status: "상품 묶음 키워드로 변환했습니다."
+        };
+      }
+
+      const cnParts = [];
+      const enParts = [];
+      wordKeywordMap
+        .slice()
+        .sort((a, b) => b.ko.length - a.ko.length)
+        .forEach((item) => {
+          if (compact.includes(item.ko)) {
+            cnParts.push(item.cn);
+            enParts.push(item.en);
+          }
+        });
+
+      const cn = dedupeParts(cnParts).join(" ");
+      const en = dedupeParts(enParts).join(" ");
+
+      if (cn || en) {
+        return {
+          cn,
+          en,
+          matched: cnParts.length,
+          status: "쇼핑 키워드 사전으로 변환했습니다."
+        };
+      }
+
+      return {
+        cn: keyword,
+        en: keyword,
+        matched: 0,
+        status: "사전에 없는 단어입니다. 번역 확인이 필요합니다."
+      };
+    }
+
+    function getCurrentSuggestion() {
+      return buildKeywordSuggestion(krInput.value);
+    }
+
+    function updateKeywordSuggestion() {
+      const suggestion = getCurrentSuggestion();
+      suggestCn.textContent = suggestion.cn || "-";
+      suggestEn.textContent = suggestion.en || "-";
+      assistStatus.textContent = suggestion.status;
+      return suggestion;
+    }
+
+    function applySuggestedKeywords(show = true) {
+      const suggestion = updateKeywordSuggestion();
+      const combined = [suggestion.cn, suggestion.en].filter(Boolean).join(" ");
+      if (!combined) {
+        if (show) showToast("먼저 한국어 상품 키워드를 입력하세요.");
+        return;
+      }
+      cnInput.value = combined;
+      updatePlatformLinks();
+      renderCaptionVariants();
+      if (show) showToast("추천 키워드를 적용했습니다.");
+    }
+
+    function getSuggestedKeywordText() {
+      const suggestion = updateKeywordSuggestion();
+      return [suggestion.cn, suggestion.en].filter(Boolean).join(" ");
+    }
+
+    function getQuery(platform) {
+      const kr = krInput.value.trim();
+      const cn = cnInput.value.trim();
+      if (platform.key === "cn") return cn || kr;
+      return kr || cn;
+    }
+
+    function getPlatformUrl(platform) {
+      if (platform.needsQuery === false) return platform.build("");
+      const query = getQuery(platform);
+      return query ? platform.build(query) : "";
+    }
+
+    function copyText(text) {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) {
+        return Promise.resolve(false);
+      }
+      return navigator.clipboard.writeText(text)
+        .then(() => true)
+        .catch(() => false);
+    }
+
+    async function fetchJson(url, options = {}) {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        }
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data || data.ok === false) {
+        throw new Error((data && data.error) || "요청을 처리하지 못했습니다.");
+      }
+      return data;
+    }
+
+    function setCoupangStatus(message, isError = false) {
+      coupangStatus.textContent = message;
+      coupangStatus.style.color = isError ? "var(--danger)" : "var(--muted)";
+    }
+
+    async function loadCoupangStatus() {
+      try {
+        const status = await fetchJson("/api/coupang/status");
+        coupangSubId.value = status.subId || "";
+        if (status.configured) {
+          setCoupangStatus(`연결 준비됨: ${status.accessKeyMasked} · Sub ID ${status.subId || "-"}`);
+        } else {
+          setCoupangStatus("쿠팡 Access Key와 Secret Key를 저장하면 API 검색을 쓸 수 있습니다.");
+        }
+      } catch (error) {
+        setCoupangStatus(`상태 확인 실패: ${error.message}`, true);
+      }
+    }
+
+    async function saveCoupangConfig() {
+      const accessKey = coupangAccessKey.value.trim();
+      const secretKey = coupangSecretKey.value.trim();
+      const subId = coupangSubId.value.trim();
+      if (!accessKey && !secretKey) {
+        showToast("Access Key와 Secret Key를 입력하세요.");
+        return;
+      }
+      try {
+        const status = await fetchJson("/api/coupang/config", {
+          method: "POST",
+          body: JSON.stringify({ accessKey, secretKey, subId })
+        });
+        coupangAccessKey.value = "";
+        coupangSecretKey.value = "";
+        setCoupangStatus(`저장 완료: ${status.accessKeyMasked} · Sub ID ${status.subId || "-"}`);
+        showToast("쿠팡 API 키를 로컬에 저장했습니다.");
+      } catch (error) {
+        setCoupangStatus(`저장 실패: ${error.message}`, true);
+      }
+    }
+
+    function formatWon(value) {
+      const number = Number(value || 0);
+      return number ? `${number.toLocaleString("ko-KR")}원` : "-";
+    }
+
+    function getCoupangProducts(response) {
+      const data = response && response.response && response.response.data;
+      if (!data) return [];
+      if (Array.isArray(data.productData)) return data.productData;
+      if (Array.isArray(data)) return data;
+      return [];
+    }
+
+    function renderCoupangProducts(products) {
+      coupangProductResults.innerHTML = "";
+      if (!products.length) {
+        const empty = document.createElement("p");
+        empty.className = "hint";
+        empty.textContent = "검색 결과가 없습니다.";
+        coupangProductResults.appendChild(empty);
+        return;
+      }
+      products.forEach((product) => {
+        const card = document.createElement("article");
+        const image = document.createElement("img");
+        const details = document.createElement("div");
+        const title = document.createElement("strong");
+        const meta = document.createElement("p");
+        const actions = document.createElement("div");
+        const openButton = document.createElement("a");
+        const copyButton = document.createElement("button");
+        const deeplinkButton = document.createElement("button");
+
+        card.className = "product-card";
+        image.src = product.productImage || "";
+        image.alt = product.productName || "쿠팡 상품";
+        title.textContent = product.productName || "이름 없는 상품";
+        meta.textContent = [
+          formatWon(product.productPrice),
+          product.isRocket ? "로켓" : "",
+          product.isFreeShipping ? "무료배송" : ""
+        ].filter(Boolean).join(" · ");
+        actions.className = "item-actions";
+
+        openButton.className = "btn small green";
+        openButton.href = product.productUrl || "#";
+        openButton.target = "_blank";
+        openButton.rel = "noopener noreferrer";
+        openButton.textContent = "상품 열기";
+
+        copyButton.className = "btn small";
+        copyButton.type = "button";
+        copyButton.textContent = "링크 복사";
+        copyButton.addEventListener("click", () => {
+          copyText(product.productUrl || "").then((copied) => {
+            showToast(copied ? "상품 링크를 복사했습니다." : "브라우저가 복사를 막았습니다.");
+          });
+        });
+
+        deeplinkButton.className = "btn small";
+        deeplinkButton.type = "button";
+        deeplinkButton.textContent = "변환칸에 넣기";
+        deeplinkButton.addEventListener("click", () => {
+          const current = coupangDeeplinkUrls.value.trim();
+          coupangDeeplinkUrls.value = [current, product.productUrl].filter(Boolean).join("\n");
+          showToast("딥링크 변환칸에 넣었습니다.");
+        });
+
+        actions.append(openButton, copyButton, deeplinkButton);
+        details.append(title, meta, actions);
+        card.append(image, details);
+        coupangProductResults.appendChild(card);
+      });
+    }
+
+    async function searchCoupangProducts() {
+      const keyword = coupangSearchKeyword.value.trim() || krInput.value.trim();
+      const limit = Math.max(1, Math.min(20, Number(coupangSearchLimit.value || 10)));
+      if (!keyword) {
+        showToast("검색할 상품 키워드를 입력하세요.");
+        return;
+      }
+      coupangProductResults.innerHTML = `<p class="hint">쿠팡 상품을 검색하는 중입니다.</p>`;
+      try {
+        const query = new URLSearchParams({ keyword, limit: String(limit) });
+        const res = await fetch(`http://localhost:3000/api/search?${query.toString()}`);
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        const products = data;
+        renderCoupangProducts(products);
+        showToast(`쿠팡 상품 ${products.length}개를 불러왔습니다.`);
+      } catch (error) {
+        coupangProductResults.innerHTML = `<p class="hint">검색 실패: ${error.message}</p>`;
+        showToast("쿠팡 검색에 실패했습니다.");
+      }
+    }
+
+    async function convertCoupangLinks() {
+      const urls = coupangDeeplinkUrls.value.split(/\n+/).map((url) => url.trim()).filter(Boolean);
+      if (!urls.length) {
+        showToast("변환할 쿠팡 URL을 입력하세요.");
+        return;
+      }
+      coupangDeeplinkOutput.value = "파트너스 링크를 생성하는 중입니다.";
+      try {
+        const data = await fetchJson("/api/coupang/deeplink", {
+          method: "POST",
+          body: JSON.stringify({ urls })
+        });
+        const links = data.response && Array.isArray(data.response.data) ? data.response.data : [];
+        const output = links.map((link) => [
+          `원본: ${link.originalUrl || "-"}`,
+          `파트너스: ${link.shortenUrl || link.landingUrl || "-"}`,
+          link.landingUrl ? `랜딩: ${link.landingUrl}` : ""
+        ].filter(Boolean).join("\n")).join("\n\n");
+        coupangDeeplinkOutput.value = output || JSON.stringify(data.response, null, 2);
+        showToast("파트너스 링크를 생성했습니다.");
+      } catch (error) {
+        coupangDeeplinkOutput.value = `실패: ${error.message}`;
+        showToast("파트너스 링크 생성에 실패했습니다.");
+      }
+    }
+
+    function openDownloadTool(tool) {
+      const sourceUrl = downloadSourceUrl.value.trim();
+      if (sourceUrl) {
+        copyText(sourceUrl).then((copied) => {
+          showToast(copied ? `${tool.name} 열기 전 영상 링크를 복사했습니다.` : `${tool.name}을 엽니다. 링크는 직접 복사해 주세요.`);
+        });
+      } else {
+        showToast(`${tool.name}을 엽니다. 영상 링크를 먼저 넣으면 자동 복사됩니다.`);
+      }
+      openUrl(tool.url);
+    }
+
+    function renderDownloadTools() {
+      downloadToolGrid.innerHTML = "";
+      downloadTools.forEach((tool) => {
+        const button = document.createElement("button");
+        const badge = document.createElement("span");
+        const name = document.createElement("strong");
+        const note = document.createElement("span");
+
+        button.type = "button";
+        button.className = "tool-card download-card";
+        badge.className = `tool-badge ${tool.badgeClass || "customTool"}`;
+        badge.textContent = tool.icon;
+        name.textContent = tool.name;
+        note.textContent = tool.note;
+
+        button.append(badge, name, note);
+        button.addEventListener("click", () => openDownloadTool(tool));
+        downloadToolGrid.appendChild(button);
+      });
+    }
+
+    function setSubtitleStatus(message, isError = false) {
+      subtitleStatus.textContent = message;
+      subtitleStatus.style.color = isError ? "var(--danger)" : "var(--muted)";
+    }
+
+    function getSubtitleBaseName() {
+      const file = subtitleVideoFile.files && subtitleVideoFile.files[0];
+      const raw = file ? file.name.replace(/\.[^.]+$/, "") : "shopping-shorts-subtitle";
+      return raw.replace(/[\\/:*?"<>|]+/g, "_").trim() || "shopping-shorts-subtitle";
+    }
+
+    function downloadTextFile(filename, text, type = "text/plain;charset=utf-8") {
+      const blob = new Blob([text || ""], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function extractSubtitles() {
+      const file = subtitleVideoFile.files && subtitleVideoFile.files[0];
+      if (!file) {
+        setSubtitleStatus("먼저 자막을 뽑을 영상 파일을 선택하세요.", true);
+        showToast("영상 파일을 선택하세요.");
+        return;
+      }
+
+      const button = document.querySelector("#extractSubtitles");
+      const formData = new FormData();
+      formData.append("video", file);
+      formData.append("language", subtitleLanguage.value);
+      formData.append("model", subtitleModel.value);
+
+      button.disabled = true;
+      setSubtitleStatus("자막을 추출하는 중입니다. 긴 영상은 몇 분 걸릴 수 있습니다.");
+      subtitleOutput.value = "";
+
+      try {
+        const response = await fetch("/api/transcribe", {
+          method: "POST",
+          body: formData
+        });
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data || !data.ok) {
+          const error = data && data.error ? data.error : "자막 서버 응답을 확인할 수 없습니다.";
+          throw new Error(error);
+        }
+        subtitleResult = data;
+        subtitleOutput.value = data.text || "";
+        const durationText = data.duration ? ` · ${Math.round(data.duration)}초` : "";
+        setSubtitleStatus(`완료: ${data.filename || file.name} · 감지 언어 ${data.language || "-"} · ${data.segments.length}개 구간${durationText}`);
+        showToast("자막 추출이 끝났습니다.");
+      } catch (error) {
+        subtitleResult = null;
+        setSubtitleStatus(`실패: ${error.message}. 로컬 자막 서버로 페이지를 열었는지 확인하세요.`, true);
+        showToast("자막 추출에 실패했습니다.");
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    function cloneList(items) {
+      return JSON.parse(JSON.stringify(items));
+    }
+
+    function normalizeUrl(value) {
+      const raw = value.trim();
+      if (!raw) return "";
+      if (/^https?:\/\//i.test(raw)) return raw;
+      return `https://${raw}`;
+    }
+
+    function readList(key, defaults) {
+      try {
+        const stored = JSON.parse(localStorage.getItem(key) || "null");
+        return Array.isArray(stored) ? stored : cloneList(defaults);
+      } catch {
+        return cloneList(defaults);
+      }
+    }
+
+    function writeList(key, items) {
+      localStorage.setItem(key, JSON.stringify(items));
+    }
+
+    function moveItem(items, index, direction) {
+      const nextIndex = index + direction;
+      if (nextIndex < 0 || nextIndex >= items.length) return items;
+      const next = [...items];
+      const [item] = next.splice(index, 1);
+      next.splice(nextIndex, 0, item);
+      return next;
+    }
+
+    function makeActionButton(label, onClick, extraClass = "") {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `btn small ${extraClass}`.trim();
+      button.textContent = label;
+      button.addEventListener("click", onClick);
+      return button;
+    }
+
+    function getAiTools() {
+      return readList(AI_TOOLS_KEY, defaultAiTools);
+    }
+
+    function saveAiTools(items) {
+      writeList(AI_TOOLS_KEY, items);
+      renderAiTools();
+    }
+
+    function renderAiTools() {
+      const tools = getAiTools();
+      aiToolGrid.innerHTML = "";
+      tools.forEach((tool, index) => {
+        const card = document.createElement("article");
+        const link = document.createElement("a");
+        const content = document.createElement("div");
+        const badge = document.createElement("span");
+        const name = document.createElement("strong");
+        const note = document.createElement("span");
+        const actions = document.createElement("div");
+
+        card.className = "tool-card";
+        link.className = "tool-link";
+        link.href = tool.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        badge.className = `tool-badge ${tool.badgeClass || "customTool"}`;
+        badge.textContent = tool.icon || (tool.name || "?").slice(0, 1).toUpperCase();
+        name.textContent = tool.name;
+        note.textContent = tool.note || "메모 없음";
+        actions.className = "item-actions";
+
+        actions.append(
+          makeActionButton("위", () => saveAiTools(moveItem(tools, index, -1))),
+          makeActionButton("아래", () => saveAiTools(moveItem(tools, index, 1))),
+          makeActionButton("삭제", () => saveAiTools(tools.filter((_, itemIndex) => itemIndex !== index)))
+        );
+        content.append(badge, name, note);
+        link.append(content);
+        card.append(link, actions);
+        aiToolGrid.appendChild(card);
+      });
+    }
+
+    function addAiTool() {
+      const name = aiToolName.value.trim();
+      const url = normalizeUrl(aiToolUrl.value);
+      const note = aiToolNote.value.trim();
+      if (!name || !url) {
+        showToast("도구 이름과 URL을 입력하세요.");
+        return;
+      }
+      const item = {
+        name,
+        url,
+        note: note || "사용자 추가 도구",
+        icon: name.slice(0, 1).toUpperCase(),
+        badgeClass: "customTool"
+      };
+      saveAiTools([...getAiTools(), item]);
+      aiToolName.value = "";
+      aiToolUrl.value = "";
+      aiToolNote.value = "";
+      showToast("제작 도구를 추가했습니다.");
+    }
+
+    function getUploadLinks() {
+      const links = readList(UPLOAD_LINKS_KEY, defaultUploadLinks);
+      return links.map((item) => {
+        const name = String(item.name || "").toLowerCase();
+        const url = String(item.url || "").toLowerCase();
+        const isYoutube = name.includes("유튜브") || name.includes("youtube") || url.includes("youtube.com/upload");
+        if (!isYoutube) return item;
+        return { ...item, url: YOUTUBE_STUDIO_URL };
+      });
+    }
+
+    function saveUploadLinks(items) {
+      writeList(UPLOAD_LINKS_KEY, items);
+      renderUploadLinks();
+      renderCaptionVariants();
+    }
+
+    function getUploadHref(item) {
+      if (item.kind === "threads") {
+        return `${item.url}?text=${encodeURIComponent(getPostCaptionText())}`;
+      }
+      return item.url;
+    }
+
+    function renderUploadLinks() {
+      const links = getUploadLinks();
+      uploadLinkGrid.innerHTML = "";
+      links.forEach((item) => {
+        const wrapper = document.createElement("div");
+        const link = document.createElement("a");
+
+        wrapper.className = "upload-item";
+        link.className = `btn ${item.variant || ""}`.trim();
+        link.href = getUploadHref(item);
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = item.name;
+
+        wrapper.append(link);
+        uploadLinkGrid.appendChild(wrapper);
+      });
+    }
+
+    function addUploadLink() {
+      const name = uploadLinkName.value.trim();
+      const url = normalizeUrl(uploadLinkUrl.value);
+      if (!name || !url) {
+        showToast("업로드 위치 이름과 URL을 입력하세요.");
+        return;
+      }
+      saveUploadLinks([...getUploadLinks(), { name, url, variant: "" }]);
+      uploadLinkName.value = "";
+      uploadLinkUrl.value = "";
+      showToast("업로드 링크를 추가했습니다.");
+    }
+
+    function showGeneratedLinks(title, links) {
+      linkTray.classList.add("show");
+      linkTray.innerHTML = `
+        <strong>${title}</strong>
+        <div class="link-list">
+          ${links.map((link) => `
+            <a class="quick-link" href="${link.url}" target="_blank" rel="noopener noreferrer">${link.name}</a>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function updatePlatformLinks() {
+      platforms.forEach((platform) => {
+        const link = platformsEl.querySelector(`[data-platform-id="${platform.id}"]`);
+        if (!link) return;
+        const url = getPlatformUrl(platform);
+        link.href = url || "#";
+        link.setAttribute("aria-disabled", String(!url));
+        link.title = url || "먼저 상품 키워드를 입력하세요.";
+      });
+    }
+
+    function openUrl(url) {
+      const opened = window.open(url, "_blank", "noopener,noreferrer");
+      if (!opened) {
+        copyText(url).then((copied) => {
+          showToast(copied ? "팝업이 차단되어 URL을 복사했습니다." : "팝업이 차단되어 링크를 표시했습니다.");
+          showGeneratedLinks("직접 열기", [{ name: "검색 페이지", url }]);
+        });
+      }
+    }
+
+    function openPlatform(platform) {
+      const url = getPlatformUrl(platform);
+      if (!url) {
+        showToast("먼저 상품 키워드를 입력하세요.");
+        return;
+      }
+      openUrl(url);
+      saveRecent(false);
+    }
+
+    function openGroup(group) {
+      const selected = platforms.filter((platform) => platform.group === group);
+      const missing = selected.every((platform) => !getQuery(platform));
+      if (missing) {
+        showToast("먼저 상품 키워드를 입력하세요.");
+        return;
+      }
+      const links = selected
+        .map((platform) => ({ name: platform.name, url: getPlatformUrl(platform) }))
+        .filter((link) => link.url);
+      showGeneratedLinks("팝업이 막히면 아래 링크를 하나씩 누르세요.", links);
+      selected.forEach((platform, index) => {
+        window.setTimeout(() => openPlatform(platform), index * 180);
+      });
+    }
+
+    function renderPlatforms() {
+      platformsEl.innerHTML = "";
+      platforms.forEach((platform) => {
+        const card = document.createElement("article");
+        card.className = "platform";
+        card.innerHTML = `
+          <div class="platform-icon ${platform.id}">${platform.icon}</div>
+          <div>
+            <strong>${platform.name}</strong>
+            <span>${platform.note}</span>
+          </div>
+          <a class="btn small platform-open" data-platform-id="${platform.id}" href="#" target="_blank" rel="noopener noreferrer">열기</a>
+        `;
+        card.querySelector(".platform-open").addEventListener("click", (event) => {
+          const url = getPlatformUrl(platform);
+          if (!url) {
+            event.preventDefault();
+            showToast("먼저 상품 키워드를 입력하세요.");
+            return;
+          }
+          event.currentTarget.href = url;
+          saveRecent(false);
+        });
+        platformsEl.appendChild(card);
+      });
+      updatePlatformLinks();
+    }
+
+    function readRecent() {
+      try {
+        return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function writeRecent(items) {
+      localStorage.setItem(RECENT_KEY, JSON.stringify(items.slice(0, 12)));
+      renderRecent();
+    }
+
+    function saveRecent(show = true) {
+      const kr = krInput.value.trim();
+      const cn = cnInput.value.trim();
+      if (!kr && !cn) {
+        if (show) showToast("저장할 키워드가 없습니다.");
+        return;
+      }
+      const next = [{ kr, cn }, ...readRecent().filter((item) => item.kr !== kr || item.cn !== cn)];
+      writeRecent(next);
+      if (show) showToast("키워드를 저장했습니다.");
+    }
+
+    function renderRecent() {
+      const items = readRecent();
+      recentChips.innerHTML = "";
+      if (!items.length) {
+        const empty = document.createElement("span");
+        empty.className = "hint";
+        empty.textContent = "아직 저장된 키워드가 없습니다.";
+        recentChips.appendChild(empty);
+        return;
+      }
+      items.forEach((item) => {
+        const chip = document.createElement("button");
+        chip.className = "chip";
+        chip.type = "button";
+        chip.textContent = item.kr || item.cn;
+        chip.title = [item.kr, item.cn].filter(Boolean).join(" / ");
+        chip.addEventListener("click", () => {
+          krInput.value = item.kr || "";
+          cnInput.value = item.cn || "";
+          updateKeywordSuggestion();
+          updatePlatformLinks();
+          updateThreadsLink();
+          showToast("키워드를 불러왔습니다.");
+        });
+        recentChips.appendChild(chip);
+      });
+    }
+
+    function getTrendKey() {
+      return `${TREND_KEY_PREFIX}${todayKey}`;
+    }
+
+    function readTrends() {
+      try {
+        return JSON.parse(localStorage.getItem(getTrendKey()) || "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function writeTrends(items) {
+      const sorted = [...items].sort((a, b) => Number(b.score) - Number(a.score));
+      localStorage.setItem(getTrendKey(), JSON.stringify(sorted.slice(0, 20)));
+      renderTrends();
+    }
+
+    function addTrendItem() {
+      const name = trendName.value.trim();
+      const reason = trendReason.value.trim();
+      const score = Math.max(1, Math.min(10, Number(trendScore.value || 7)));
+      if (!name) {
+        showToast("후보 상품명을 입력하세요.");
+        return;
+      }
+      const next = [
+        { name, reason, score, savedAt: new Date().toISOString() },
+        ...readTrends().filter((item) => item.name !== name)
+      ];
+      writeTrends(next);
+      trendName.value = "";
+      trendReason.value = "";
+      trendScore.value = "7";
+      showToast("오늘 후보에 추가했습니다.");
+    }
+
+    function removeTrendItem(name) {
+      writeTrends(readTrends().filter((item) => item.name !== name));
+      showToast("후보를 삭제했습니다.");
+    }
+
+    function startResearchFromTrend(item) {
+      krInput.value = item.name;
+      cnInput.value = "";
+      updateKeywordSuggestion();
+      updatePlatformLinks();
+      updateThreadsLink();
+      saveRecent(false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      showToast("검색 키워드에 넣었습니다.");
+    }
+
+    function getTrendListText() {
+      const items = readTrends();
+      if (!items.length) return `[${todayKey} 틱톡 상품 후보]\n후보 없음`;
+      return [
+        `[${todayKey} 틱톡 상품 후보]`,
+        ...items.map((item, index) => `${index + 1}. ${item.name} (${item.score}/10) - ${item.reason || "메모 없음"}`)
+      ].join("\n");
+    }
+
+    function renderTrends() {
+      const items = readTrends();
+      trendList.innerHTML = "";
+      if (!items.length) {
+        const empty = document.createElement("p");
+        empty.className = "hint";
+        empty.textContent = "아직 오늘 저장한 후보가 없습니다.";
+        trendList.appendChild(empty);
+        return;
+      }
+      items.forEach((item) => {
+        const row = document.createElement("article");
+        row.className = "trend-item";
+        const details = document.createElement("div");
+        const title = document.createElement("strong");
+        const body = document.createElement("p");
+        const actions = document.createElement("div");
+        const score = document.createElement("span");
+        const startButton = document.createElement("button");
+        const deleteButton = document.createElement("button");
+
+        title.textContent = item.name;
+        body.textContent = item.reason || "메모 없음";
+        score.className = "score-pill";
+        score.textContent = `${item.score}/10`;
+        actions.className = "toolbar";
+        startButton.className = "btn small green";
+        startButton.type = "button";
+        startButton.textContent = "조사 시작";
+        deleteButton.className = "btn small";
+        deleteButton.type = "button";
+        deleteButton.textContent = "삭제";
+
+        startButton.addEventListener("click", () => startResearchFromTrend(item));
+        deleteButton.addEventListener("click", () => removeTrendItem(item.name));
+        details.append(title, body);
+        actions.append(score, startButton, deleteButton);
+        row.append(details, actions);
+        trendList.appendChild(row);
+      });
+    }
+
+    function getMemoText() {
+      const kr = krInput.value.trim();
+      const cn = cnInput.value.trim();
+      const body = memo.value.trim();
+      return [
+        "[쇼핑쇼츠 소스 메모]",
+        `한국어 키워드: ${kr || "-"}`,
+        `중국어/영문 키워드: ${cn || "-"}`,
+        "",
+        body || "후보 링크 없음"
+      ].join("\n");
+    }
+
+    function getDefaultCaption() {
+      const keyword = krInput.value.trim() || "추천 상품";
+      return `${keyword} 찾는 분들 보세요.\n\n#쇼핑추천 #쇼핑쇼츠 #틱톡쇼핑 #인스타릴스 #쿠팡파트너스`;
+    }
+
+    function getPostCaptionText() {
+      return postCaption.value.trim() || getDefaultCaption();
+    }
+
+    function getVideoTitleSeed() {
+      const file = videoFile.files && videoFile.files[0];
+      if (!file) return "";
+      return file.name
+        .replace(/\.[^.]+$/, "")
+        .replace(/[_-]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function getCaptionKeyword() {
+      return krInput.value.trim() || getVideoTitleSeed() || "추천 상품";
+    }
+
+    function getCaptionHashtags(keyword, platformType) {
+      const compactKeyword = keyword.replace(/[^0-9A-Za-z가-힣]/g, "");
+      const tags = [
+        compactKeyword ? `#${compactKeyword}` : "",
+        "#쇼핑추천",
+        "#쇼핑쇼츠",
+        platformType === "youtube" ? "#유튜브쇼츠" : "",
+        platformType === "instagram" ? "#인스타릴스" : "",
+        platformType === "threads" ? "#쓰레드추천" : "",
+        platformType === "tiktok" ? "#틱톡쇼핑" : "",
+        "#쿠팡파트너스"
+      ];
+      return dedupeParts(tags).join(" ");
+    }
+
+    function getPlatformCaptionType(item) {
+      const raw = `${item.name || ""} ${item.url || ""}`.toLowerCase();
+      if (raw.includes("youtube") || raw.includes("youtu") || raw.includes("유튜브")) return "youtube";
+      if (raw.includes("instagram") || raw.includes("인스타")) return "instagram";
+      if (raw.includes("threads") || raw.includes("쓰레드")) return "threads";
+      if (raw.includes("tiktok") || raw.includes("틱톡")) return "tiktok";
+      return "generic";
+    }
+
+    function buildCaptionForUploadLink(item) {
+      const keyword = getCaptionKeyword();
+      const fileTitle = getVideoTitleSeed();
+      const type = getPlatformCaptionType(item);
+      const tags = getCaptionHashtags(keyword, type);
+      const sourceLine = fileTitle && fileTitle !== keyword ? `\n\n영상 파일: ${fileTitle}` : "";
+
+      if (type === "youtube") {
+        return [
+          `제목: ${keyword} 쇼츠 추천`,
+          "",
+          "설명:",
+          `${keyword} 찾는 분들을 위해 짧게 정리했습니다.`,
+          "가격, 옵션, 배송 조건은 구매 전에 한 번 더 확인하세요.",
+          "파트너스 링크는 수수료가 발생할 수 있습니다.",
+          sourceLine.trim(),
+          "",
+          tags
+        ].filter(Boolean).join("\n");
+      }
+
+      if (type === "instagram") {
+        return [
+          `${keyword} 찾는 분들 보세요.`,
+          "",
+          "짧게 보기 좋은 쇼핑 후보로 정리했습니다.",
+          "저장해두고 가격/옵션 비교할 때 확인하세요.",
+          "파트너스 링크는 수수료가 발생할 수 있어요.",
+          sourceLine.trim(),
+          "",
+          tags
+        ].filter(Boolean).join("\n");
+      }
+
+      if (type === "threads") {
+        return [
+          `${keyword} 써본 분 있나요?`,
+          "쇼츠로 후보 하나 정리했는데, 비슷한 제품 찾는 분이면 참고해보세요.",
+          "가격/옵션은 업로드 전에 다시 확인 필요.",
+          sourceLine.trim(),
+          "",
+          tags
+        ].filter(Boolean).join("\n");
+      }
+
+      if (type === "tiktok") {
+        return [
+          `${keyword} 찾고 있으면 이거 저장해두세요.`,
+          "짧게 비교하기 좋은 쇼핑 후보입니다.",
+          "가격/옵션은 구매 전에 직접 확인하세요.",
+          sourceLine.trim(),
+          "",
+          tags
+        ].filter(Boolean).join("\n");
+      }
+
+      return [
+        `${keyword} 쇼츠 업로드용 캡션`,
+        "상품 포인트와 가격/옵션은 게시 전에 한 번 더 확인하세요.",
+        sourceLine.trim(),
+        "",
+        tags
+      ].filter(Boolean).join("\n");
+    }
+
+    function getCaptionVariants() {
+      const links = getUploadLinks();
+      if (!links.length) return [{ name: "기본", text: buildCaptionForUploadLink({ name: "기본", url: "" }) }];
+      return links.map((item) => ({
+        name: item.name,
+        text: buildCaptionForUploadLink(item)
+      }));
+    }
+
+    function applyCaptionVariant(name, text) {
+      postCaption.value = text;
+      updateThreadsLink();
+      showToast(`${name} 캡션을 적용했습니다.`);
+    }
+
+    function renderCaptionVariants() {
+      const variants = getCaptionVariants();
+      captionVariantGrid.innerHTML = "";
+      variants.forEach((variant) => {
+        const card = document.createElement("article");
+        const title = document.createElement("strong");
+        const preview = document.createElement("pre");
+        const actions = document.createElement("div");
+        const applyButton = document.createElement("button");
+        const copyButton = document.createElement("button");
+
+        card.className = "caption-card";
+        title.textContent = variant.name;
+        preview.textContent = variant.text;
+        actions.className = "caption-actions";
+        applyButton.className = "btn small green";
+        applyButton.type = "button";
+        applyButton.textContent = "적용";
+        copyButton.className = "btn small";
+        copyButton.type = "button";
+        copyButton.textContent = "복사";
+
+        applyButton.addEventListener("click", () => applyCaptionVariant(variant.name, variant.text));
+        copyButton.addEventListener("click", () => {
+          copyText(variant.text).then((copied) => {
+            showToast(copied ? `${variant.name} 캡션을 복사했습니다.` : "브라우저가 복사를 막았습니다.");
+          });
+        });
+
+        actions.append(applyButton, copyButton);
+        card.append(title, preview, actions);
+        captionVariantGrid.appendChild(card);
+      });
+    }
+
+    function updateThreadsLink() {
+      renderUploadLinks();
+    }
+
+    function updateVideoInfo() {
+      const file = videoFile.files && videoFile.files[0];
+      if (!file) {
+        videoInfo.textContent = "MP4 파일을 선택하면 공유 지원 여부를 확인합니다.";
+        renderCaptionVariants();
+        return;
+      }
+      const sizeMb = (file.size / 1024 / 1024).toFixed(1);
+      const canShareFile = !!(navigator.canShare && navigator.canShare({ files: [file] }));
+      videoInfo.textContent = `${file.name} · ${sizeMb}MB · ${canShareFile ? "브라우저 공유 가능" : "브라우저 직접 공유 미지원"}`;
+      renderCaptionVariants();
+      if (!postCaption.value.trim()) {
+        const primary = getCaptionVariants()[0];
+        if (primary) {
+          postCaption.value = primary.text;
+          updateThreadsLink();
+        }
+      }
+    }
+
+    document.querySelector("#openChina").addEventListener("click", () => openGroup("china"));
+    document.querySelector("#openGlobal").addEventListener("click", () => openGroup("global"));
+    darkTheme.addEventListener("click", () => {
+      applyTheme("dark");
+      showToast("다크 모드로 전환했습니다.");
+    });
+    lightTheme.addEventListener("click", () => {
+      applyTheme("light");
+      showToast("라이트 모드로 전환했습니다.");
+    });
+    document.querySelector("#openTranslate").addEventListener("click", () => {
+      applySuggestedKeywords(true);
+    });
+    document.querySelector("#applySuggestedKeywords").addEventListener("click", () => applySuggestedKeywords(true));
+    document.querySelector("#copySuggestedKeywords").addEventListener("click", () => {
+      const text = getSuggestedKeywordText();
+      if (!text) {
+        showToast("먼저 한국어 상품 키워드를 입력하세요.");
+        return;
+      }
+      copyText(text).then((copied) => {
+        showToast(copied ? "추천 키워드를 복사했습니다." : "브라우저가 복사를 막았습니다.");
+      });
+    });
+    document.querySelector("#saveKeyword").addEventListener("click", () => saveRecent(true));
+    krInput.addEventListener("input", () => {
+      updateKeywordSuggestion();
+      updatePlatformLinks();
+      updateThreadsLink();
+      renderCaptionVariants();
+    });
+    cnInput.addEventListener("input", () => {
+      updatePlatformLinks();
+      renderCaptionVariants();
+    });
+    document.querySelector("#clearRecent").addEventListener("click", () => {
+      writeRecent([]);
+      showToast("최근 키워드를 비웠습니다.");
+    });
+    document.querySelector("#copyMemo").addEventListener("click", () => {
+      copyText(getMemoText()).then((copied) => {
+        showToast(copied ? "메모를 복사했습니다." : "브라우저가 복사를 막았습니다. 메모 저장을 사용하세요.");
+      });
+    });
+    document.querySelector("#addTrendItem").addEventListener("click", addTrendItem);
+    trendName.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") addTrendItem();
+    });
+    document.querySelector("#clearTrendItems").addEventListener("click", () => {
+      writeTrends([]);
+      showToast("오늘 후보를 비웠습니다.");
+    });
+    document.querySelector("#copyTrendItems").addEventListener("click", () => {
+      copyText(getTrendListText()).then((copied) => {
+        showToast(copied ? "오늘 후보 목록을 복사했습니다." : "브라우저가 복사를 막았습니다.");
+      });
+    });
+    document.querySelector("#saveCoupangKeys").addEventListener("click", saveCoupangConfig);
+    document.querySelector("#checkCoupangStatus").addEventListener("click", loadCoupangStatus);
+    document.querySelector("#searchCoupangProducts").addEventListener("click", searchCoupangProducts);
+    coupangSearchKeyword.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") searchCoupangProducts();
+    });
+    document.querySelector("#convertCoupangLinks").addEventListener("click", convertCoupangLinks);
+    document.querySelector("#copyCoupangLinks").addEventListener("click", () => {
+      const text = coupangDeeplinkOutput.value.trim();
+      if (!text) {
+        showToast("복사할 파트너스 링크가 없습니다.");
+        return;
+      }
+      copyText(text).then((copied) => {
+        showToast(copied ? "파트너스 링크 결과를 복사했습니다." : "브라우저가 복사를 막았습니다.");
+      });
+    });
+    document.querySelector("#addAiTool").addEventListener("click", addAiTool);
+    document.querySelector("#resetAiTools").addEventListener("click", () => {
+      writeList(AI_TOOLS_KEY, cloneList(defaultAiTools));
+      renderAiTools();
+      showToast("제작 도구 기본값을 복원했습니다.");
+    });
+    document.querySelector("#addUploadLink").addEventListener("click", addUploadLink);
+    document.querySelector("#generateCaptions").addEventListener("click", () => {
+      renderCaptionVariants();
+      showToast("플랫폼별 캡션을 다시 만들었습니다.");
+    });
+    document.querySelector("#extractSubtitles").addEventListener("click", extractSubtitles);
+    document.querySelector("#copySubtitleText").addEventListener("click", () => {
+      const text = subtitleOutput.value.trim();
+      if (!text) {
+        showToast("복사할 자막이 없습니다.");
+        return;
+      }
+      copyText(text).then((copied) => {
+        showToast(copied ? "자막 텍스트를 복사했습니다." : "브라우저가 복사를 막았습니다.");
+      });
+    });
+    document.querySelector("#downloadSubtitleTxt").addEventListener("click", () => {
+      const text = subtitleOutput.value.trim();
+      if (!text) {
+        showToast("저장할 TXT 자막이 없습니다.");
+        return;
+      }
+      downloadTextFile(`${getSubtitleBaseName()}.txt`, `${text}\n`);
+    });
+    document.querySelector("#downloadSubtitleSrt").addEventListener("click", () => {
+      if (!subtitleResult || !subtitleResult.srt) {
+        showToast("저장할 SRT 자막이 없습니다.");
+        return;
+      }
+      downloadTextFile(`${getSubtitleBaseName()}.srt`, subtitleResult.srt);
+    });
+    document.querySelector("#downloadSubtitleVtt").addEventListener("click", () => {
+      if (!subtitleResult || !subtitleResult.vtt) {
+        showToast("저장할 VTT 자막이 없습니다.");
+        return;
+      }
+      downloadTextFile(`${getSubtitleBaseName()}.vtt`, subtitleResult.vtt, "text/vtt;charset=utf-8");
+    });
+    postCaption.addEventListener("input", updateThreadsLink);
+    videoFile.addEventListener("change", updateVideoInfo);
+    document.querySelector("#copyPostCaption").addEventListener("click", () => {
+      copyText(getPostCaptionText()).then((copied) => {
+        showToast(copied ? "캡션을 복사했습니다." : "브라우저가 복사를 막았습니다.");
+      });
+    });
+    document.querySelector("#shareVideo").addEventListener("click", async () => {
+      const file = videoFile.files && videoFile.files[0];
+      if (!file) {
+        showToast("먼저 완성된 영상 파일을 선택하세요.");
+        return;
+      }
+      if (!(navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share)) {
+        showToast("이 브라우저는 파일 공유를 지원하지 않습니다. 업로드 버튼을 사용하세요.");
+        return;
+      }
+      try {
+        await navigator.share({
+          files: [file],
+          title: "쇼핑쇼츠",
+          text: getPostCaptionText()
+        });
+        showToast("공유 창을 열었습니다.");
+      } catch {
+        showToast("공유가 취소됐습니다.");
+      }
+    });
+    document.querySelector("#downloadMemo").addEventListener("click", () => {
+      const blob = new Blob([getMemoText()], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "shopping-shorts-source-memo.txt";
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("메모 파일을 저장했습니다.");
+    });
+
+    krInput.value = "휴대용 선풍기";
+    cnInput.value = "便携风扇 portable fan";
+    trendDate.textContent = todayKey;
+    applyTheme(localStorage.getItem(THEME_KEY) || "dark");
+    renderPlatforms();
+    renderRecent();
+    renderTrends();
+    loadCoupangStatus();
+    renderAiTools();
+    renderDownloadTools();
+    renderUploadLinks();
+    renderCaptionVariants();
+    updateKeywordSuggestion();
+    updateThreadsLink();
+    // --- Fable5 생성 API 로직 연동 ---
+
+    // 1. 대본 변환 로직
+    const convertScriptBtn = document.getElementById('convertScript');
+    if (convertScriptBtn) {
+      convertScriptBtn.addEventListener('click', async () => {
+        const rawText = document.getElementById('subtitleOutput').value.trim();
+        if (!rawText) {
+          showToast('변환할 자막 텍스트가 없습니다. 먼저 자막을 추출하세요.');
+          return;
+        }
+        showToast('AI가 대본을 작성 중입니다...');
+        
+        // 쿠팡 검색에서 저장된 가격이 있다면 사용 (임시)
+        const koreanPrice = document.querySelector('.product-card .price')?.textContent.replace(/[^0-9]/g, '') || null;
+
+        try {
+          const res = await fetch('http://localhost:3000/api/convert-script', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rawText, koreanPrice })
+          });
+          if (!res.ok) throw new Error(await res.text());
+          const scriptData = await res.json();
+          
+          // 캡션에 자동 반영
+          const postCaption = document.getElementById('postCaption');
+          postCaption.value = `${scriptData.hook}\n\n${scriptData.features}\n\n${scriptData.price_value}\n\n${scriptData.cta}\n\n#쇼핑추천 #쿠팡파트너스`;
+          
+          // 로그 출력 (UI용)
+          document.getElementById('subtitleOutput').value = 
+            `[변환 성공]\n상품명: ${scriptData.product_name}\n\n[완성 대본]\n${scriptData.full_script}\n\n[확인 필요사항]\n${scriptData.needs_check}`;
+          
+          showToast('대본 변환이 완료되어 캡션 초안에 반영되었습니다.');
+        } catch (error) {
+          showToast(`대본 변환 실패: ${error.message}`);
+        }
+      });
+    }
+
+    // 2. 틱톡 검색 결과 표 로직
+    const tiktokSearchBtn = document.getElementById('tiktokSearchBtn');
+    if (tiktokSearchBtn) {
+      tiktokSearchBtn.addEventListener('click', async () => {
+        const keyword = document.getElementById('trendName').value.trim() || '便携风扇';
+        const resultDiv = document.getElementById('tiktokResult');
+        resultDiv.innerHTML = '<p class="hint">틱톡 검색 중입니다... (크롬 창이 열리면 캡차를 확인해 주세요)</p>';
+        showToast('틱톡 크롤링을 시작합니다. 최대 45초 소요됩니다.');
+
+        try {
+          const res = await fetch(`http://localhost:3000/api/tiktok-search?keyword=${encodeURIComponent(keyword)}`);
+          if (!res.ok) throw new Error(await res.text());
+          const videos = await res.json();
+          
+          if (!videos.length) {
+            resultDiv.innerHTML = '<p class="hint">검색 결과가 없습니다.</p>';
+            showToast('검색 결과가 없습니다.');
+            return;
+          }
+
+          resultDiv.innerHTML = `
+            <table border="1" cellpadding="8" style="width: 100%; border-collapse: collapse; text-align: left; border-color: var(--line);">
+              <tr style="background: rgba(0,0,0,0.2);">
+                <th style="padding: 8px;">순위</th>
+                <th style="padding: 8px;">제목</th>
+                <th style="padding: 8px;">조회수</th>
+                <th style="padding: 8px;">영상</th>
+              </tr>
+              ${videos.map(v => `
+              <tr style="border-bottom: 1px solid var(--line);">
+                <td style="padding: 8px;">${v.rank}</td>
+                <td style="padding: 8px; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${v.title}</td>
+                <td style="padding: 8px; color: var(--green); font-weight: bold;">${v.viewsText}</td>
+                <td style="padding: 8px;"><a href="${v.url}" target="_blank" style="color: var(--cyan);">보기</a></td>
+              </tr>`).join('')}
+            </table>`;
+          showToast('틱톡 검색 결과를 불러왔습니다.');
+        } catch (error) {
+          resultDiv.innerHTML = `<p class="danger">오류 발생: ${error.message}</p>`;
+          showToast('틱톡 검색 중 오류가 발생했습니다.');
+        }
+      });
+    }
+  </script>
+</body>
+</html>
