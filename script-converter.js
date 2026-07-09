@@ -15,8 +15,8 @@ const PROVIDER = 'gemini'; // 'gemini' 또는 'openai'
 const GEMINI_API_KEY = 'AIzaSyB2q7ljRzuN_sVZPAjpqP8JcnlqJcs3KrQ'; // https://aistudio.google.com 무료 발급
 const OPENAI_API_KEY = '여기에_OPENAI_키_입력'; // https://platform.openai.com 발급
 
-const GEMINI_MODEL = 'gemini-1.5-pro-latest'; // 2026년 최신 제미나이 프로 모델
-const OPENAI_MODEL = 'gpt-4o';                  // 최신 최고 품질 모델
+const GEMINI_MODEL = 'gemini-3.1-pro'; // 2026년 하반기 기준 제미나이 최신 프로 모델
+const OPENAI_MODEL = 'gpt-5.5';        // 2026년 기준 오픈AI 최신 플래그십 모델
 const TEMPERATURE = 0.8;                 // 매번 비슷한 결과를 원하면 0.3~0.5로 낮추세요
 
 // ── 2. 시스템 프롬프트 (대본 품질의 핵심) ──
